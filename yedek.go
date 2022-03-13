@@ -8,6 +8,43 @@ import (
 	"golang.org/x/image/bmp"
 )
 
+//---HTTP-SERVER---
+
+/*func rootHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "public/index.html")
+}*/
+/*
+type ResponseData struct {
+	sayilar float64 `json:"sayilar"`
+}
+
+type Connection struct {
+	ResponseDatas []ResponseData
+}
+
+func rootHandler(w http.ResponseWriter, request *http.Request) {
+
+	var clients []ResponseData
+	clients = append(clients, ResponseData{
+		sayilar: 123123,
+	})
+
+	//myJson, _ := json.Marshal(Connection{ResponseDatas: clients})
+	//fmt.Println(string(myJson))
+	fmt.Println(clients)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(clients); err != nil {
+		panic(err)
+	}
+
+}
+
+//-----------------
+*/
 func bitMapYukle(YOL string) (*image.Paletted, error) {
 
 	dosya_bmp, err := os.Open(YOL) //Dosya yolu ile "tank.bmp" alındı.
@@ -44,31 +81,14 @@ func yapHistogram(tankImg *image.Paletted, binDegeri uint8) *[]uint8 { //tank im
 
 }
 
-func yapPMF(histoPtr *[]uint8, binDegeri uint8) *[]uint8 {
-
-	var pmf_array = make([]uint8, uint8(255/binDegeri))
-
-	//(*histoPtr)[i]
-
-	return &pmf_array
-
-}
-
-func hesaplaOrtalama(histoPtr *[]uint8, binDegeri uint8) float32 {
-
-	var ortalama float32 = 0
-
-	return ortalama
-}
-
-func hesaplaStandartSapma(histoPtr *[]uint8, binDegeri uint8) float32 {
-
-	var s_sapma float32 = 0
-
-	return s_sapma
-}
-
 func main() {
+
+	//http.Handle("/", http.FileServer(http.Dir("./public")))
+
+	//http.HandleFunc("/", rootHandler)
+	//http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
+
+	//http.ListenAndServe(":8090", nil)
 
 	bitMapCall, _ := bitMapYukle("tank.bmp")
 	var binningDegeri uint8 = 4 //BIN BIN BIN -> DEGER DEGISTIRILEBILIR <- BIN BIN BIN
