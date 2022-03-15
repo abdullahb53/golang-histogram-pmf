@@ -1,3 +1,6 @@
+//376938_ABDULLAH_BIYIK
+//KTÜ-BİLGİSAYAR-MÜHENDİSLİĞİ-4.SINIF-1.ÖĞRETİM
+//ÖDEV-1-SAYISAL-İŞARET-İŞLEME-(HİSTOGRAM PMF ORTALAMA STANDART SAPMA)
 package main
 
 import (
@@ -130,17 +133,30 @@ func histoYazdir(histoPtr *[]uint16, binDegeri uint8) {
 func main() {
 
 	bitMapCall, _ := bitMapYukle("tank.bmp")
-	var binningDegeri uint8 = 4 //BIN BIN BIN -> DEGER DEGISTIRILEBILIR <- BIN BIN BIN
+	var binningDegeri uint8
+	fmt.Println("->BIN DEGERI GIRISI:(1,2,3,4) 0->EXIT")
+	fmt.Scanln(&binningDegeri)
 
-	histoCall := yapHistogram(bitMapCall, binningDegeri)                                            //histoCall histogramArray ptr tutuyor.
-	histoOrtalamaDegeri := hesaplaOrtalama(histoCall, binningDegeri)                                //histocall ptr ve binnig değeri parametre alan ortalama fonk. çağırılıyor.
-	histoStandartSapmaDegeri := hesaplaStandartSapma(histoCall, binningDegeri, histoOrtalamaDegeri) //histocall ptr ve binnig parametre alan StndrtSapma fonksiyonu çağırılıyor.
+	for {
+		if binningDegeri != 0 {
 
-	histoYazdir(histoCall, binningDegeri) //histogram indexleri terminale basılıyor.
+			histoCall := yapHistogram(bitMapCall, binningDegeri)                                            //histoCall histogramArray ptr tutuyor.
+			histoOrtalamaDegeri := hesaplaOrtalama(histoCall, binningDegeri)                                //histocall ptr ve binnig değeri parametre alan ortalama fonk. çağırılıyor.
+			histoStandartSapmaDegeri := hesaplaStandartSapma(histoCall, binningDegeri, histoOrtalamaDegeri) //histocall ptr ve binnig parametre alan StndrtSapma fonksiyonu çağırılıyor.
 
-	fmt.Print("\n\n[___OrtalamaDegeri__]->[", histoOrtalamaDegeri, "]\n[___StandartSapma___]->[", histoStandartSapmaDegeri, "]\n") //ortalama ve ss terminale basılyıor.
+			histoYazdir(histoCall, binningDegeri) //histogram indexleri terminale basılıyor.
 
-	ProMassFunc := yapPMF(histoCall, binningDegeri, bitMapCall) // PMF kısmı
-	fmt.Print("\n [---PMF---] \n", "[", ProMassFunc, "]")       // PMF doğrudan ekrana basıldı.
+			fmt.Print("\n\n[___OrtalamaDegeri__]->[", histoOrtalamaDegeri, "]\n[___StandartSapma___]->[", histoStandartSapmaDegeri, "]\n") //ortalama ve ss terminale basılyıor.
+
+			ProMassFunc := yapPMF(histoCall, binningDegeri, bitMapCall) // PMF kısmı
+			fmt.Print("\n [---PMF---] \n", "[", ProMassFunc, "]")       // PMF doğrudan ekrana basıldı.
+
+			fmt.Println("\n\nBIN DEGERI GIRISI:(1,2,3,4) 0->EXIT")
+			fmt.Scanln(&binningDegeri)
+		} else {
+			break
+		}
+
+	}
 
 }
