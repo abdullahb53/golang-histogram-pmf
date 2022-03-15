@@ -27,7 +27,7 @@ func bitMapYukle(YOL string) (*image.Paletted, error) {
 
 }
 
-func imageLengthXy(tankImg *image.Paletted) uint32 {
+func imageLengthXy(tankImg *image.Paletted) uint32 { //tank fotoğrafının boyutu(X*Y) döndürüldü.
 	var lengthTankImage uint32 = uint32(tankImg.Bounds().Max.X * tankImg.Bounds().Max.Y)
 	return lengthTankImage
 }
@@ -62,11 +62,11 @@ func yapPMF(histoPtr *[]uint16, binDegeri uint8, tankImg *image.Paletted) *[]flo
 
 	var pmf_array = make([]float32, 255)
 	var lengthTankImage = imageLengthXy(tankImg)
-	for i := 0; i < int(len(*histoPtr)); i += int(binDegeri) {
+	for i := 0; i < int(len(*histoPtr)); i += int(binDegeri) { // PMF alt alan 1 olacak şekilde toplam piksel sayısına oranla indexleniyor...
 		pmf_array[i] = float32((*histoPtr)[i]) / float32((lengthTankImage))
-		if pmf_array[i] > 1 {
-			fmt.Println("\n histo->", (*histoPtr)[i], "\n length->", lengthTankImage, "\n pmfarray->", pmf_array[i])
-		}
+		/*if pmf_array[i] > 1 {
+			fmt.Println("\n histo->", (*histoPtr)[i], "\n length->", lengthTankImage, "\n pmfarray->", pmf_array[i])// 1den küçük değermi kontrolü için yazılımştı...
+		}*/
 	}
 
 	//(*histoPtr)[i]
@@ -79,10 +79,12 @@ func hesaplaOrtalama(histoPtr *[]uint16, binDegeri uint8) float32 {
 
 	var ortalama float32 = 0
 	var havuz int = 0
-	for i := 0; i < int(len(*histoPtr)); i += int(binDegeri) {
+	var adet uint16 = 0
+	for i := 0; i < int(len(*histoPtr)); i += int(binDegeri) { //ortalama formülü gerçekleştirildi.
 		havuz += int((*histoPtr)[i])
+		adet++
 	}
-	ortalama = float32(havuz) / float32((255 - (255%binDegeri)/binDegeri))
+	ortalama = float32(havuz) / float32(adet)
 
 	return ortalama
 }
@@ -92,13 +94,16 @@ func hesaplaStandartSapma(histoPtr *[]uint16, binDegeri uint8, histoOrtalamaDege
 	var s_sapma float32 = 0
 	var toplam_havuz float32 = 0
 	var fark float32 = 0
-	for i := 0; i < int(len(*histoPtr)); i++ {
+	var adet uint16
+	for i := 0; i < int(len(*histoPtr)); i += int(binDegeri) { //standart sapma için formül gerçekleştiriliyor.
 		fark = float32((*histoPtr)[i]) - histoOrtalamaDegeri
 		fark = fark * fark
 		toplam_havuz = toplam_havuz + fark
 		fark = 0
+		adet++
 	}
-	s_sapma = toplam_havuz / float32((len(*histoPtr) - 1))
+	//s_sapma = toplam_havuz / float32((len(*histoPtr) - 1))
+	s_sapma = toplam_havuz / float32(adet)
 
 	s_sapma = float32(math.Sqrt(float64(s_sapma)))
 
@@ -106,31 +111,36 @@ func hesaplaStandartSapma(histoPtr *[]uint16, binDegeri uint8, histoOrtalamaDege
 }
 
 func histoYazdir(histoPtr *[]uint16, binDegeri uint8) {
-	fmt.Print("\n")
-	for i := 0; i < 255; i += int(binDegeri) {
+	fmt.Print("\n [--Histogram--] \n")
+	for i := 0; i < 255; i += int(binDegeri) { //bin degerine gore indexi geziyoruz.
 		if binDegeri != 1 {
 			var k uint8 = 0
 			for k = 1; k < binDegeri; k++ {
-				fmt.Print(".")
+				fmt.Print(".") //bin degerine göre gösterimde boş indexleri "nokta" ile temsil ettik.
 			}
 		} else {
-			fmt.Print(",")
+			fmt.Print(",") //bin değeri 1 ise "virgül" temsil kullandık, çünkü boş index yok.
 		}
 		fmt.Print((*histoPtr)[i])
-	}
 
+	}
+	fmt.Print("\n [--Histogram--]")
 }
 
 func main() {
 
 	bitMapCall, _ := bitMapYukle("tank.bmp")
-	var binningDegeri uint8 = 1 //BIN BIN BIN -> DEGER DEGISTIRILEBILIR <- BIN BIN BIN
-	histoCall := yapHistogram(bitMapCall, binningDegeri)
-	histoOrtalamaDegeri := hesaplaOrtalama(histoCall, binningDegeri)
-	histoStandartSapmaDegeri := hesaplaStandartSapma(histoCall, binningDegeri, histoOrtalamaDegeri)
-	histoYazdir(histoCall, binningDegeri)
-	fmt.Print("\n\n[___OrtalamaDegeri__]->[", histoOrtalamaDegeri, "]\n[___StandartSapma___]->[", histoStandartSapmaDegeri, "]\n")
-	ProMassFunc := yapPMF(histoCall, binningDegeri, bitMapCall)
-	fmt.Print("\n", "[", ProMassFunc, "]")
+	var binningDegeri uint8 = 4 //BIN BIN BIN -> DEGER DEGISTIRILEBILIR <- BIN BIN BIN
+
+	histoCall := yapHistogram(bitMapCall, binningDegeri)                                            //histoCall histogramArray ptr tutuyor.
+	histoOrtalamaDegeri := hesaplaOrtalama(histoCall, binningDegeri)                                //histocall ptr ve binnig değeri parametre alan ortalama fonk. çağırılıyor.
+	histoStandartSapmaDegeri := hesaplaStandartSapma(histoCall, binningDegeri, histoOrtalamaDegeri) //histocall ptr ve binnig parametre alan StndrtSapma fonksiyonu çağırılıyor.
+
+	histoYazdir(histoCall, binningDegeri) //histogram indexleri terminale basılıyor.
+
+	fmt.Print("\n\n[___OrtalamaDegeri__]->[", histoOrtalamaDegeri, "]\n[___StandartSapma___]->[", histoStandartSapmaDegeri, "]\n") //ortalama ve ss terminale basılyıor.
+
+	ProMassFunc := yapPMF(histoCall, binningDegeri, bitMapCall) // PMF kısmı
+	fmt.Print("\n [---PMF---] \n", "[", ProMassFunc, "]")       // PMF doğrudan ekrana basıldı.
 
 }
